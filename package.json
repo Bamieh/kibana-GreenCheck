@@ -1,0 +1,29 @@
+{
+  "name": "kibana-greenCheck",
+  "private": true,
+  "version": "1.0.1",
+  "repository": "git@github.com:Bamieh/kibana-greenCheck.git",
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": {
+    "packages": [
+      "apps/chat",
+      "packages/*"
+    ],
+    "nohoist": []
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "turbo": "2.5.3"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "start": "turbo run start",
+    "test": "turbo run test",
+    "check-types": "turbo run check-types",
+    "clean": "rm -rf node_modules && npm exec --workspaces -c 'rm -rf node_modules'"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "system": "You are a helpful assistant that categorizes code into a specific category {categoriesDetails}.",
+  "user": "Please categorize the following code: {code}"
+}

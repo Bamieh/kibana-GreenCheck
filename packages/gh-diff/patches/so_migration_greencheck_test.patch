@@ -1,0 +1,99 @@
+diff --git a/packages/kbn-check-mappings-update-cli/current_mappings.json b/packages/kbn-check-mappings-update-cli/current_mappings.json
+index 986b17e67fc..0f9c26cc34e 100644
+--- a/packages/kbn-check-mappings-update-cli/current_mappings.json
++++ b/packages/kbn-check-mappings-update-cli/current_mappings.json
+@@ -3055,6 +3055,9 @@
+       "last_installation_date": {
+         "type": "date"
+       },
++      "new_mapped_prop": {
++        "type": "keyword"
++      },
+       "product_name": {
+         "type": "keyword"
+       },
+diff --git a/x-pack/packages/ai-infra/product-doc-artifact-builder/src/artifact/mappings.ts b/x-pack/packages/ai-infra/product-doc-artifact-builder/src/artifact/mappings.ts
+index 763288f49f5..0ebed18ce24 100644
+--- a/x-pack/packages/ai-infra/product-doc-artifact-builder/src/artifact/mappings.ts
++++ b/x-pack/packages/ai-infra/product-doc-artifact-builder/src/artifact/mappings.ts
+@@ -28,6 +28,7 @@ export const getArtifactMappings = (
+       slug: { type: 'keyword' },
+       url: { type: 'keyword' },
+       version: { type: 'version' },
++      new_mapped_prop: { type: 'keyword' },
+       ai_subtitle: { type: 'text' },
+       ai_summary: semanticTextMapping,
+       ai_questions_answered: semanticTextMapping,
+diff --git a/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md b/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md
+index 0ff6c34dd27..db2033e4738 100644
+--- a/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md
++++ b/x-pack/platform/plugins/shared/ai_infra/product_doc_base/README.md
+@@ -1,3 +1,6 @@
+ # Product documentation base plugin
+ 
+ This plugin contains the product documentation base service.
++
++
++Unrelated doc change
+\ No newline at end of file
+diff --git a/x-pack/platform/plugins/shared/ai_infra/product_doc_base/common/install_status.ts b/x-pack/platform/plugins/shared/ai_infra/product_doc_base/common/install_status.ts
+index 9a9247cfe28..0ce437bd779 100644
+--- a/x-pack/platform/plugins/shared/ai_infra/product_doc_base/common/install_status.ts
++++ b/x-pack/platform/plugins/shared/ai_infra/product_doc_base/common/install_status.ts
+@@ -26,6 +26,7 @@ export interface ProductDocInstallStatus {
+   lastInstallationFailureReason: string | undefined;
+   indexName?: string;
+   inferenceId?: string;
++  unmappedAttribute?: string;
+ }
+ 
+ export interface ProductInstallState {
+diff --git a/x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/saved_objects/product_doc_install.ts b/x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/saved_objects/product_doc_install.ts
+index c18add6994a..a25ffe7000a 100644
+--- a/x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/saved_objects/product_doc_install.ts
++++ b/x-pack/platform/plugins/shared/ai_infra/product_doc_base/server/saved_objects/product_doc_install.ts
+@@ -24,7 +24,10 @@ export interface ProductDocInstallStatusAttributes {
+   last_installation_failure_reason?: string;
+   index_name?: string;
+   inference_id?: string;
++  new_unmapped_prop?: string;
++  new_mapped_prop?: string;
+ }
++
+ const modelVersion1: SavedObjectsModelVersion = {
+   changes: [
+     {
+@@ -50,10 +53,12 @@ export const productDocInstallStatusSavedObjectType: SavedObjectsType<ProductDoc
+         last_installation_date: { type: 'date' },
+         index_name: { type: 'keyword' },
+         inference_id: { type: 'keyword' },
++        new_mapped_prop: { type: 'keyword' },
+       },
+     },
+     management: {
+       importableAndExportable: false,
+     },
++    // unchanged version
+     modelVersions: { '1': modelVersion1 },
+   };
+diff --git a/x-pack/platform/plugins/shared/ml/server/plugin.ts b/x-pack/platform/plugins/shared/ml/server/plugin.ts
+index 4edf29bc996..1f4b375eee4 100644
+--- a/x-pack/platform/plugins/shared/ml/server/plugin.ts
++++ b/x-pack/platform/plugins/shared/ml/server/plugin.ts
+@@ -126,6 +126,7 @@ export class MlServerPlugin
+     this.cases = plugins.cases;
+     const { admin, user, apmUser } = getPluginPrivileges();
+ 
++    const unrelatedChange = 'jobsListLink';
+     plugins.features.registerKibanaFeature({
+       id: PLUGIN_ID,
+       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
+@@ -141,7 +142,7 @@ export class MlServerPlugin
+           'Granting All or Read feature privilege for Machine Learning will also grant the equivalent feature privileges to certain types of Kibana saved objects, namely index patterns, dashboards, saved Discover sessions and visualizations as well as machine learning job, trained model and module saved objects.',
+       }),
+       management: {
+-        insightsAndAlerting: ['jobsListLink', 'triggersActions'],
++        insightsAndAlerting: [unrelatedChange, 'triggersActions'],
+       },
+       alerting: alertingFeatures,
+       privileges: {

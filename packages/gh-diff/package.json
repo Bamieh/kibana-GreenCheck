@@ -1,0 +1,33 @@
+{
+  "name": "@greenCheck/gh-diff",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist/**"
+  ],
+  "dependencies": {
+    "@elastic/elasticsearch": "9",
+    "lodash": "^4.17.21",
+    "parse-git-patch": "^2.1.1",
+    "simple-git": "^3.28.0",
+    "typescript": "^5.4.5",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@greenCheck/typescript-config": "*",
+    "@types/node": "^22",
+    "tsup": "^8.0.2",
+    "vitest": "3.1.4"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --format esm,cjs --watch --dts",
+    "check-types": "tsup --dts-only",
+    "test": "vitest"
+  }
+}
