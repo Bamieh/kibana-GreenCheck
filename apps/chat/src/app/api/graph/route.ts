@@ -32,9 +32,17 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { graphId } = await request.json();
+  if (!graphId) {
+    return NextResponse.json({
+      success: false,
+      error: 'Graph ID is required'
+    }, { status: 400 });
+  }
+  
   try {
     // Call the generateGraphImageData function from the greencheck-module
-    const graphResult = await generateGraphImageData();
+    const graphResult = await generateGraphImageData(graphId);
     
     // Return the image data as a base64 string for easy transmission
     const base64Image = Buffer.from(graphResult.imageData).toString('base64');

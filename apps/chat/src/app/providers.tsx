@@ -5,6 +5,7 @@ import createCache from '@emotion/cache';
 import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
 import { EuiThemeAmsterdam } from '@elastic/eui'
 import { ChatLayout } from '@/components/ChatLayout';
+import { graphDefinitions } from '@greenCheck/greencheck-module';
 
 const cache = createCache({
   key: 'codesandbox',
@@ -16,20 +17,25 @@ const cache = createCache({
 export const Providers = ({ children }: { children: React.ReactNode }) => {
   const sideNavItems = [
     {
-      name: 'Home',
-      id: 'home',
+      name: 'Execute',
+      id: 'execute',
       items: [
         {
           name: 'Chat',
           id: 'chat',
           href: '/',
         },
-        {
-          name: 'Graph',
-          id: 'graph',
-          href: '/graph',
-        },
       ],
+    },
+    {
+      name: 'Graphs',
+      id: 'graphs',
+      href: '/graph',
+      items: graphDefinitions.map((graph) => ({
+        name: graph.graphName,
+        id: graph.graphId,
+        href: `/graph/${graph.graphId}`,
+      }))
     },
   ];
 

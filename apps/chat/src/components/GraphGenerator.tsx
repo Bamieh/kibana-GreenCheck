@@ -8,12 +8,28 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
   EuiCallOut,
+  EuiLink,
+  EuiBetaBadge,
 } from '@elastic/eui';
+import { graphDefinitions } from '@greenCheck/greencheck-module';
+import Link from 'next/link';
 
-export const GraphGenerator: React.FC = () => {
+export const GraphGenerator: React.FC<{ graphId?: string }> = ({ graphId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const graphDefinition = graphId ? graphDefinitions.find(graph => graph.graphId === graphId) : null;
+  if (!graphDefinition) {
+    return (
+      <EuiPanel paddingSize="m">
+        <EuiText>
+          <h3>Graph Generator</h3>
+          <p>Graph with id {graphId} not found. Please select a valid graph from the <Link href="/graph">Graphs</Link> page.</p>
+        </EuiText>
+      </EuiPanel>
+    )
+  }
 
   const generateGraph = async () => {
     setIsLoading(true);
@@ -26,6 +42,7 @@ export const GraphGenerator: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        body: graphId ? JSON.stringify({ graphId }) : undefined,
       });
 
       const data = await response.json();
@@ -42,11 +59,27 @@ export const GraphGenerator: React.FC = () => {
     }
   };
 
+  const label = graphDefinition.graphType === 'workflow' ? 'Workflow' : 'Subgraph';
+  const color = graphDefinition.graphType === 'workflow' ? 'accent' : 'hollow';
+
+  
   return (
-    <EuiPanel paddingSize="m">
+    <EuiPanel paddingSize="m" style={{ position: 'relative' }}>
+      <EuiBetaBadge
+        label={label}
+        color={color}
+        tooltipContent={graphDefinition.graphType === 'workflow' ?
+          'Workflows are the main entry point for the GreenCheck AI module.' :
+          'Subgraphs are modules for each specific code change category.'}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+        }}
+      />
       <EuiText>
-        <h3>Graph Generator</h3>
-        <p>Click the button below to generate the GreenCheck AI module.</p>
+        <h3>Graph Generator: {graphDefinition.graphName}</h3>
+        <p>Click the button below to generate the {graphDefinition.graphName} graph.</p>
       </EuiText>
       
       <EuiSpacer size="m" />

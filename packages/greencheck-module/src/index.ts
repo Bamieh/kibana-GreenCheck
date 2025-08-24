@@ -1,2 +1,2 @@
-export { getModel } from "./model";
+export { graphDefinitions } from "./graphs_definitions";
 export { generateGraphImageData } from "./utils/generate_graph";
