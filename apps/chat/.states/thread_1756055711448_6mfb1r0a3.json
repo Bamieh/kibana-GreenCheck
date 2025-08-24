@@ -1,0 +1,13 @@
+{
+  "threadId": "thread_1756055711448_6mfb1r0a3",
+  "messages": [
+    {
+      "type": "ai",
+      "content": "Hello! I'm GreenCheck, your sustainability assistant. I can help you analyze your Kibana code changes for sustainability and compliance. How can I help you today?",
+      "timestamp": "2025-08-24T17:15:11.448Z"
+    }
+  ],
+  "isComplete": false,
+  "lastUpdated": "2025-08-24T17:15:11.448Z",
+  "status": "started"
+}

@@ -4,9 +4,13 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiText,
+  EuiButton,
+  EuiCommentList,
+  EuiComment,
   EuiAvatar,
-  EuiSpacer,
 } from '@elastic/eui';
+import { formatDistanceToNow, format } from 'date-fns';
+import { LoadingIndicator } from './LoadingIndicator';
 
 interface Message {
   id: string;
@@ -17,39 +21,43 @@ interface Message {
 
 interface ChatAreaProps {
   messages: Message[];
+  isLoading: boolean;
 }
 
-export const ChatArea: React.FC<ChatAreaProps> = ({ messages }) => {
+export const ChatArea: React.FC<ChatAreaProps> = ({ messages, isLoading }) => {
+  console.log(messages);
+  const comments = messages.map((message) => ({
+    id: message.id,
+    username: message.role === 'user' ? 'You' : 'GreenCheck',
+    event: message.role === 'user' ? 'commented' : 'replied',
+    timestamp: formatDistanceToNow(new Date(message.timestamp), { addSuffix: true }),
+    children: (
+      <EuiText size="s">
+        {message.content}
+      </EuiText>
+    ),
+    timelineAvatar: (
+      <EuiAvatar
+        size="m"
+        name={message.role === 'user' ? 'You' : 'GreenCheck'}
+        iconType={message.role === 'user' ? 'user' : 'compute'}
+      />
+    ),
+  }));
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {messages.map((message) => (
-          <EuiFlexItem key={message.id} grow={false}>
-            <EuiFlexGroup gutterSize="m" alignItems="flexStart">
-              <EuiFlexItem grow={false}>
-                <EuiAvatar
-                  size="m"
-                  name={message.role === 'user' ? 'User' : 'GreenCheck'}
-                  iconType={message.role === 'user' ? 'user' : 'chat'}
-                  
-                />
-              </EuiFlexItem>
-              
-              <EuiFlexItem>
-                <EuiPanel paddingSize="s" hasShadow={false} color="subdued">
-                  <EuiText size="s">
-                    {message.content}
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                  <EuiText size="xs" color="subdued">
-                    {message.timestamp.toLocaleTimeString()}
-                  </EuiText>
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ))}
+        <EuiFlexItem>
+          <EuiCommentList comments={comments} />
+          
+          {/* Loading indicator */}
+          {isLoading && (
+            <EuiFlexItem grow={false}>
+              <LoadingIndicator message="Processing your request..." />
+            </EuiFlexItem>
+          )}
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

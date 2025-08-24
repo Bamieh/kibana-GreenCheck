@@ -12,7 +12,7 @@ import {
 import { subgraphChecker } from './modules/subgraph_checker';
 
 import { prModuleGraph } from './modules/pr_module';
-import { AIMessage, ToolMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage, ToolMessage } from "@langchain/core/messages";
 
 export interface BaseState {
   messages: any[];
@@ -88,8 +88,12 @@ const routeAfterSubgraph = (state: BaseState): "point_to_documentation" | "__end
 };
 
 const grabBranchDetailsNode = async (state: BaseState) => {
-  console.log('Grabbing branch details...');
+  console.log('Grabbing branch details...', state);
+  const lastMessage = state.messages[state.messages.length - 1] as HumanMessage;
+  console.log('lastMessage::', lastMessage);
+
   return {
+    ...state,
     branchDetails: {
       name: 'main',
       url: 'https://github.com/org/repo/tree/main'

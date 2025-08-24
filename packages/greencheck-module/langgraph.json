@@ -1,0 +1,5 @@
+{
+  "graphs": {
+    "chat": "./src/graph.ts:graph"
+  }
+}

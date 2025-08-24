@@ -19,6 +19,8 @@ interface ChatbarProps {
   setInputValue: (value: string) => void;
   handleSendMessage: () => void;
   handleKeyPress: (e: React.KeyboardEvent) => void;
+  isLoading: boolean;
+  disabled: boolean;
 }
 
 const SubmitButton = ({
@@ -51,22 +53,34 @@ const SubmitButton = ({
   );
 };
 
-export const Chatbar = ({ inputValue, setInputValue, handleSendMessage, handleKeyPress }: ChatbarProps) => {
+export const Chatbar = ({ 
+  inputValue, 
+  setInputValue, 
+  handleSendMessage, 
+  handleKeyPress, 
+  isLoading, 
+  disabled 
+}: ChatbarProps) => {
   return (
     <EuiFlexGroup alignItems="flexEnd" justifyContent="spaceBetween">
       <EuiFlexItem grow={true}>
         <EuiTextArea
-          placeholder="Type your message here..."
+          placeholder={isLoading ? "Processing..." : "Type your message here..."}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyUp={handleKeyPress}
           rows={5}
           resize="none"
           fullWidth
+          disabled={disabled}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}> 
-        <SubmitButton handleSendMessage={handleSendMessage} isDisabled={!inputValue.trim()} extended={true} />
+        <SubmitButton 
+          handleSendMessage={handleSendMessage} 
+          isDisabled={!inputValue.trim() || disabled} 
+          extended={true} 
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

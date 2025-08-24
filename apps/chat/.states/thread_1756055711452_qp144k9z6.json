@@ -1,0 +1,131 @@
+{
+  "threadId": "thread_1756055711452_qp144k9z6",
+  "messages": [
+    {
+      "lc": 1,
+      "type": "constructor",
+      "id": [
+        "langchain_core",
+        "messages",
+        "AIMessage"
+      ],
+      "kwargs": {
+        "content": "Hello! I'm GreenCheck, your sustainability assistant. I can help you analyze your Kibana code changes for sustainability and compliance. How can I help you today?",
+        "timestamp": "2025-08-24T17:15:11.452Z",
+        "invalid_tool_calls": [],
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "id": "8a0b4f43-7a46-4088-9fe7-3aefce0e27c2",
+        "tool_calls": []
+      }
+    },
+    {
+      "lc": 1,
+      "type": "constructor",
+      "id": [
+        "langchain_core",
+        "messages",
+        "HumanMessage"
+      ],
+      "kwargs": {
+        "content": "njk\n",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "id": "791c8db9-45b6-47b2-bf27-93462bf0aae7"
+      }
+    },
+    {
+      "lc": 1,
+      "type": "constructor",
+      "id": [
+        "langchain_core",
+        "messages",
+        "HumanMessage"
+      ],
+      "kwargs": {
+        "content": "asda\n",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "id": "2348d503-5396-43ab-a201-31d548aacce8"
+      }
+    },
+    {
+      "lc": 1,
+      "type": "constructor",
+      "id": [
+        "langchain_core",
+        "messages",
+        "HumanMessage"
+      ],
+      "kwargs": {
+        "content": "asdfa",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "id": "7c2cd10d-acb5-4476-8b73-70bdb7ba4cd1"
+      }
+    },
+    {
+      "lc": 1,
+      "type": "constructor",
+      "id": [
+        "langchain_core",
+        "messages",
+        "HumanMessage"
+      ],
+      "kwargs": {
+        "content": "asdfa",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "id": "bfab78e4-5806-4783-925f-9b25605a1d9d"
+      }
+    },
+    {
+      "lc": 1,
+      "type": "constructor",
+      "id": [
+        "langchain_core",
+        "messages",
+        "HumanMessage"
+      ],
+      "kwargs": {
+        "content": "sadfa",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "id": "8f3864e8-ebe0-496c-a602-195dad09bbfc"
+      }
+    },
+    {
+      "lc": 1,
+      "type": "constructor",
+      "id": [
+        "langchain_core",
+        "messages",
+        "HumanMessage"
+      ],
+      "kwargs": {
+        "content": "sadfa",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "id": "9a86ec6a-0eb0-4dc9-b10c-7d33247e0ff3"
+      }
+    },
+    {
+      "lc": 1,
+      "type": "constructor",
+      "id": [
+        "langchain_core",
+        "messages",
+        "HumanMessage"
+      ],
+      "kwargs": {
+        "content": "asdfa\n",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "id": "830b29c5-ff63-4752-b993-d341942dc47a"
+      }
+    }
+  ],
+  "isComplete": false,
+  "lastUpdated": "2025-08-24T17:26:40.859Z",
+  "status": "started"
+}

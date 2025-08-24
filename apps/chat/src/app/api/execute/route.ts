@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { graph } from '@greenCheck/greencheck-module';
 import { HumanMessage } from '@langchain/core/messages';
 import {
-  generateThreadId,
   saveExecutionState,
   loadExecutionState,
   deleteExecutionState,
@@ -20,81 +19,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let currentThreadId = threadId;
-    let executionState = threadId ? await loadExecutionState(threadId) : null;
+    if (!threadId) {
+      return NextResponse.json(
+        { error: 'Thread ID is required' },
+        { status: 400 }
+      );
+    }
 
-    // If no threadId or thread doesn't exist, create a new execution
+    // Load existing execution state
+    const executionState = await loadExecutionState(threadId);
+    
     if (!executionState) {
-      currentThreadId = generateThreadId();
-      
-      // Initialize the graph with the first message
-      const humanMessage = new HumanMessage(message);
-      const initialState = {
-        messages: [humanMessage],
-      };
+      return NextResponse.json(
+        { error: 'Thread not found' },
+        { status: 404 }
+      );
+    }
 
-      try {
-        // Start the graph execution
-        const result = await graph.invoke(initialState);
-        
-        // Store the execution state
-        executionState = {
-          threadId: currentThreadId,
-          messages: result.messages || [],
-          isComplete: false,
-          lastUpdated: new Date(),
-        };
-        
-        await saveExecutionState(currentThreadId, executionState);
-        
-        return NextResponse.json({
-          threadId: currentThreadId,
-          messages: executionState.messages,
-          isComplete: executionState.isComplete,
-          status: 'started',
-        });
-        
-      } catch (error) {
-        console.error('Error starting graph execution:', error);
-        return NextResponse.json(
-          { error: 'Failed to start graph execution' },
-          { status: 500 }
-        );
-      }
-    } else {
-      // Continue existing execution with new message
-      const humanMessage = new HumanMessage(message);
-      
-      // Add the new message to existing state
-      const currentState = {
-        messages: [...executionState.messages, humanMessage],
-      };
+    // Continue existing execution with new message
+    const humanMessage = new HumanMessage(message);
+    
+    // Add the new message to existing state
+    const currentState = {
+      messages: [...executionState.messages, humanMessage],
+    };
 
-      try {
-        // Continue the graph execution
-        const result = await graph.invoke(currentState);
-        
-        // Update execution state
-        executionState.messages = result.messages || [];
-        executionState.isComplete = !result.messages || result.messages.length === 0;
-        executionState.lastUpdated = new Date();
-        
-        await saveExecutionState(currentThreadId, executionState);
-        
-        return NextResponse.json({
-          threadId: currentThreadId,
-          messages: executionState.messages,
-          isComplete: executionState.isComplete,
-          status: 'continued',
-        });
-        
-      } catch (error) {
-        console.error('Error continuing graph execution:', error);
-        return NextResponse.json(
-          { error: 'Failed to continue graph execution' },
-          { status: 500 }
-        );
-      }
+    try {
+      // Continue the graph execution
+      const result = await graph.invoke(currentState,
+        { configurable: { thread_id: threadId } },
+      );
+      console.log('result::');
+      console.log(result);
+      
+      // Update execution state
+      executionState.messages = result.messages || [];
+      executionState.isComplete = !result.messages || result.messages.length === 0;
+      executionState.lastUpdated = new Date();
+      
+      await saveExecutionState(threadId, executionState);
+      
+      return NextResponse.json({
+        threadId: threadId,
+        messages: executionState.messages,
+        isComplete: executionState.isComplete,
+        status: 'continued',
+      });
+      
+    } catch (error) {
+      console.error('Error continuing graph execution:', error);
+      return NextResponse.json(
+        { error: 'Failed to continue graph execution' },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error('Error in execute route:', error);
