@@ -23,26 +23,5 @@ At its core, Greencheck analyzes code changes, asks developers clarifying questi
 
 ## NOTES DELETE
 ```
-  "exports": {
-    ".": {
-      "import": "./src/index.ts",
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
-    },
-    "./*": "./src/*"
-  },
-  "publishConfig": {
-    "exports": {
-      ".": {
-        "import": "./dist/index.mjs",
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.mjs"
-      },
-      "./*": "./dist/*"
-    }
-  },
-  "sideEffects": false,
-  "files": [
-    "dist/**"
-  ],
+
 ```

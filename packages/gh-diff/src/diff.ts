@@ -19,8 +19,15 @@ export async function getBranchDiff(configs: BranchDiffConfigs) {
 
   
   const { patch, currentBranch } = await getPatchFromRepo(git);
+  if (!currentBranch) {
+    throw new Error('currentBranch is required');
+  }
+
   await savePatchToFile(patch, currentBranch);
   const parsedPatch = await parsePatchFromFile(currentBranch);
+  if (!parsedPatch) {
+    throw new Error('parsedPatch is required');
+  }
 
   console.log(JSON.stringify(parsedPatch, null, 2));
 

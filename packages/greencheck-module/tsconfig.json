@@ -1,0 +1,9 @@
+{
+  "extends": "@greenCheck/typescript-config/node-library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": "."
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
