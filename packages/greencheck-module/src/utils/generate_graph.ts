@@ -1,7 +1,7 @@
 import { graph } from "../graph";
 
 export const generateGraphImageData = async () => {
-  const drawableGraph = await graph.getGraphAsync();
+  const drawableGraph = await graph.getGraphAsync({ xray: true });
   const image = await drawableGraph.drawMermaidPng();
   const arrayBuffer = await image.arrayBuffer();
 

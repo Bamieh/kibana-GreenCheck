@@ -9,121 +9,135 @@ import {
   task
 } from "@langchain/langgraph";
 
+import { subgraphChecker } from './modules/subgraph_checker';
 
-import { AIMessage, ToolMessage } from '@langchain/core/messages';
-import { ToolCall } from '@langchain/core/messages/tool';
-import { weatherSearch } from './tools';
-import { getModel } from './model';
-import { grabCodeDiff } from './nodes/code_diff';
+import { prModuleGraph } from './modules/pr_module';
 
+export interface BaseState {
+  messages: any[];
+  hasChanges?: boolean;
+  changeType?: string;
+  subgraphResults?: any;
+  shouldPointToDocumentation?: boolean;
+}
 
-const model = getModel([
-  weatherSearch
-]);
-
-const callLLM = async (state: typeof MessagesAnnotation.State) => {
-    const response = await model.invoke(state.messages);
-    return { messages: [response] };
+// Node functions - empty implementations for now
+const checkCodeChangesNode = async (state: BaseState) => {
+  // TODO: Implement code change detection
+  console.log('Checking code changes...');
+  
+  // For demonstration purposes, we'll randomly select a change type
+  // In a real implementation, this would analyze the actual code changes
+  const changeTypes = ['so_migration', 'api_changes', 'other_changes'];
+  const randomChangeType = changeTypes[Math.floor(Math.random() * changeTypes.length)];
+  
+  return { 
+    hasChanges: true, 
+    changeType: randomChangeType 
+  };
 };
 
-const humanReviewNode = async (state: typeof MessagesAnnotation.State): Promise<Command> => {
-    const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
-    const toolCall = lastMessage.tool_calls![lastMessage.tool_calls!.length - 1]!;
+const pointToDocumentationNode = async (state: BaseState) => {
+  // TODO: Implement documentation pointing
+  console.log('Pointing to relevant documentation...');
+  return { documentationUrl: 'https://docs.example.com/so-migrations' };
+};
 
-    const humanReview = interrupt<
-      {
-        question: string;
-        toolCall: ToolCall;
-      },
-      {
-        action: string;
-        data: any;
-      }>({
-        question: "Is this correct?",
-        toolCall: toolCall
-      });
-
-    const reviewAction = humanReview.action;
-    const reviewData = humanReview.data;
-
-    if (reviewAction === "continue") {
-        return new Command({ goto: "run_tool" });
+// Node that checks and executes the appropriate subgraph
+const executeSubgraphNode = async (state: BaseState) => {
+  console.log('Checking for matching subgraph...');
+  
+  try {
+    const results = await subgraphChecker.executeSubgraph(state);
+    
+    if (results.noSubgraphMatch) {
+      console.log('No matching subgraph found, pointing to documentation');
+      return { 
+        subgraphResults: results,
+        shouldPointToDocumentation: true 
+      };
     }
-    else if (reviewAction === "update") {
-        const updatedMessage = {
-            role: "ai",
-            content: lastMessage.content,
-            tool_calls: [{
-                id: toolCall.id,
-                name: toolCall.name,
-                args: reviewData
-            }],
-            id: lastMessage.id
-        };
-        return new Command({ goto: "run_tool", update: { messages: [updatedMessage] } });
+    
+    return {
+      subgraphResults: results,
+      shouldPointToDocumentation: false
+    };
+  } catch (error) {
+    console.error('Error executing subgraph:', error);
+    return {
+      subgraphResults: { error: 'Failed to execute subgraph' },
+      shouldPointToDocumentation: true
+    };
+  }
+};
+
+// Conditional routing functions
+const routeAfterCodeChanges = (state: BaseState): "check Kibana modules" | "point_to_documentation" => {
+  if (state.hasChanges) {
+    return "check Kibana modules";
+  }
+  return "point_to_documentation";
+};
+
+const routeAfterSubgraph = (state: BaseState): "point_to_documentation" | "__end__" => {
+  if (state.shouldPointToDocumentation) {
+    return "point_to_documentation";
+  }
+  return END;
+};
+
+const grabBranchDetailsNode = async (state: BaseState) => {
+  console.log('Grabbing branch details...');
+  return {
+    branchDetails: {
+      name: 'main',
+      url: 'https://github.com/org/repo/tree/main'
     }
-    else if (reviewAction === "feedback") {
-        const toolMessage = new ToolMessage({
-          name: toolCall.name,
-          content: reviewData,
-          tool_call_id: toolCall.id!
-        })
-        return new Command({ goto: "call_llm", update: { messages: [toolMessage] }});
-    }
-    throw new Error("Invalid review action");
+  };
 };
 
-const runTool = async (state: typeof MessagesAnnotation.State) => {
-    const newMessages: ToolMessage[] = [];
-    const tools = { weather_search: weatherSearch };
-    const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
-    const toolCalls = lastMessage.tool_calls!;
-
-    for (const toolCall of toolCalls) {
-        const tool = tools[toolCall.name as keyof typeof tools];
-        const result = await tool.invoke(toolCall.args);
-        newMessages.push(new ToolMessage({
-            name: toolCall.name,
-            content: result,
-            tool_call_id: toolCall.id!
-        }));
-    }
-    return { messages: newMessages };
+const codeCategorizeNode = async (state: BaseState) => {
+  console.log('Categorizing code changes...');
+  return {
+    codeCategory: 'feature'
+  };
 };
 
-const routeAfterLLM = (state: typeof MessagesAnnotation.State): typeof END | "human_review_node" => {
-    const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
-    if (!lastMessage.tool_calls?.length) {
-        return END;
-    }
-    return "human_review_node";
+const grabRelevantModulesNode = async (state: BaseState) => {
+  console.log('Grabbing relevant modules...');
+  return {
+    relevantModules: ['saved_objects_migrations', 'pr_module']
+  };
 };
 
-const grabCodeDiffNode = async (state: typeof MessagesAnnotation.State) => {
-  const { codeDiff } = await grabCodeDiff(state);
-  return { codeDiff };  
-};
-const categorizeCodeNode = async (state: typeof MessagesAnnotation.State) => {
-  const { codeDiff } = await grabCodeDiff(state);
-  return { codeDiff };  
-};
-
+// Build the workflow graph
 const workflow = new StateGraph(MessagesAnnotation)
-    .addNode("grab_code_diff", grabCodeDiffNode, { ends: ["categorize_code"] })
-    .addNode("categorize_code", categorizeCodeNode, { ends: ["call_llm"] })
-    .addNode("call_llm", callLLM)
-    .addNode("run_tool", runTool)
-    .addNode("human_review_node", humanReviewNode, {
-      ends: ["run_tool", "call_llm"]
-    })
-    .addEdge(START, "grab_code_diff")
-    .addConditionalEdges(
-        "call_llm",
-        routeAfterLLM,
-        ["human_review_node", END]
-    )
-    .addEdge("run_tool", "call_llm");
+  // Add main nodes
+  .addNode("grab_branch_details", grabBranchDetailsNode)
+  .addNode("get_code_changes", checkCodeChangesNode)
+  .addNode("code_categorize", codeCategorizeNode)
+  .addNode("point_to_documentation", pointToDocumentationNode)
+  .addNode("grabRelevantModules", grabRelevantModulesNode)
+  .addNode("executeModules", executeSubgraphNode)
+  .addNode("prModuleGraph", prModuleGraph)
+  
+  // Add edges
+  .addEdge(START, "grab_branch_details")
+  .addEdge("grab_branch_details", "get_code_changes")
+  .addEdge("grab_branch_details", "code_categorize")
+  .addEdge("code_categorize", "grabRelevantModules")
+  .addEdge("get_code_changes", "grabRelevantModules")
+  
+  .addConditionalEdges(
+    "grabRelevantModules",
+    routeAfterCodeChanges,
+    ["executeModules", "point_to_documentation"]
+  )
+  .addEdge("executeModules", "point_to_documentation")
+  .addEdge("point_to_documentation", "prModuleGraph")
+  .addEdge("prModuleGraph", END);
+
 
 const memory = new MemorySaver();
 
-export const graph = workflow.compile({ checkpointer: memory });
+export const graph = workflow.compile({ checkpointer: memory, name: "Kibana Green Check" });
